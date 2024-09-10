@@ -1,0 +1,271 @@
+<html>
+<!--
+#     sm.html
+#     Copyright (C) 2006 - 2010 Joachim Breitner
+#
+#     This program is free software; you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation; either version 2 of the License, or
+#     (at your option) any later version.
+#
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program; if not, write to the Free Software
+#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+-->
+<head>
+<title>Screen message</title>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PFRC8PN');</script>
+<!-- End Google Tag Manager -->
+<style type="text/css">
+#textarea {
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:100%;
+	height:100%;
+	font-family: sans;
+	padding:0px;
+	margin:0px;
+	border:0px;
+	text-align:center;
+	overflow:hidden;
+	resize:none;
+}
+
+/* disable focus border at Chrome */
+#textarea:focus {
+	outline: none;
+}
+
+#test {
+	position:absolute;
+	visibility:hidden;
+	top:0px;
+	left:0px;
+	font-size:30px;
+	white-space:pre;
+	font-family: sans;
+	border:0px;
+	padding:0.1em;
+	margin:0px;
+}
+#about {
+	position:absolute;
+	width:20em;
+	top:30px;
+	right:30px;
+	background-color:gray;
+	padding:1em;
+}
+
+/* Switch button styles */
+.switch {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* 圓形的開關 */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+</style>
+<script type="text/javascript">
+opacity = 100;
+function adjust() {
+	ta = document.getElementById("textarea");
+	test = document.getElementById("test");
+
+	test.textContent=ta.value;
+	// Otherwise, the newline would not be counted.
+	if (ta.value[ta.value.length-1] == "\n") {
+		test.innerHTML += '.';
+	}
+
+	ratioX = (window.innerWidth) / test.offsetWidth;
+	ratioY = (window.innerHeight) / test.offsetHeight;
+	ratio = Math.min(ratioX,ratioY);
+	fontSize = Math.floor(30 * ratio) + "px"
+	ta.style.fontSize = fontSize;
+	newHeight = Math.ceil(test.offsetHeight * ratio);
+	ta.style.paddingTop = Math.floor((window.innerHeight - newHeight)/2) + "px";
+	ta.style.paddingBottom = Math.floor((window.innerHeight - newHeight)/2) + "px";
+	newWidth = Math.ceil(test.offsetWidth * ratio);
+	ta.style.paddingLeft = Math.max(0,Math.floor((window.innerWidth - newWidth)/2)) + "px";
+	ta.style.paddingRight = Math.max(0,Math.floor((window.innerWidth - newWidth)/2)) + "px";
+
+	href =  "#t=" + encodeURIComponent(ta.value);
+	if (ta.style.color) {
+		href +=  ";f=" + encodeURIComponent(ta.style.color);
+	}
+	if (ta.style.backgroundColor) {
+		href +=  ";b=" + encodeURIComponent(ta.style.backgroundColor);
+	}
+	window.location.hash = href;
+}
+
+function showBox() {
+	opacity = 100;
+	window.clearTimeout(timeout);
+	setOpacity();
+}
+function fadeOut() {
+	opacity *= 0.985;
+	if (opacity > 1) {
+		timeout = window.setTimeout("fadeOut()",20);
+	} else {
+		opacity = 0;
+	}
+	setOpacity();
+}
+function setOpacity() {
+	about = document.getElementById("about");
+	about.style.opacity = opacity/100;
+	about.style.filter = "alpha(opacity="+Math.round(opacity)+")";
+}
+
+function parseHash() {
+	ta = document.getElementById("textarea");
+	ta.focus();
+
+	var queryString = {};
+	window.location.href.replace(
+		new RegExp("([^?=&;#]+)(=([^&;]*))", "g"),
+		function($0, $1, $2, $3) {queryString[$1] = decodeURIComponent($3); }
+	);
+	if (queryString['t']) {
+		ta.value = queryString['t'];
+	}
+	if (queryString['f']) {
+		ta.style.color = queryString['f'];
+	}
+	if (queryString['b']) {
+		ta.style.backgroundColor = queryString['b'];
+	}
+	adjust();
+	timeout = window.setTimeout("fadeOut();",1000);
+	setOpacity();
+}
+
+function init() {
+	if (window.navigator.mozApps) {
+		document.getElementById("firefox").style.display = "block";
+	}
+	parseHash();
+}
+
+// 主題切換功能
+const themes = [
+    {
+        backgroundColor: "white",
+        color: "black"
+    },
+    {
+        backgroundColor: "black",
+        color: "white"
+    }
+];
+
+let currentThemeIndex = 1;
+
+function applyTheme(index) {
+    const theme = themes[index];
+    document.body.style.backgroundColor = theme.backgroundColor;
+    document.body.style.color = theme.color;
+    document.getElementById("textarea").style.backgroundColor = theme.backgroundColor;
+    document.getElementById("textarea").style.color = theme.color;
+}
+
+// 單個開關進行亮暗色系切換
+document.addEventListener("DOMContentLoaded", function() {
+    const toggleSwitch = document.getElementById("themeToggle");
+    
+    toggleSwitch.addEventListener("change", function() {
+        if (toggleSwitch.checked) {
+            currentThemeIndex = 1; // 暗色系
+        } else {
+            currentThemeIndex = 0; // 亮色系
+        }
+        applyTheme(currentThemeIndex);
+    });
+
+    // 初始化時應用當前主題
+    applyTheme(currentThemeIndex);
+});
+
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+</head>
+<body onload="init()" onhashchange="parseHash()" onresize="adjust()">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PFRC8PN"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<textarea id="textarea" onKeyUp="adjust()" onpaste="adjust()" oninput="adjust()">Hello world!</textarea>
+<span id="test"></span>
+
+
+<!-- 切換亮暗色系的 switch button -->
+<label class="switch">
+  <input type="checkbox" id="themeToggle" checked>
+  <span class="slider round"></span>
+</label>
+
+</body>
+</html>
